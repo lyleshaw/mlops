@@ -1,0 +1,307 @@
+openapi: 3.1.0
+info:
+  title: MlOps
+  version: 1.0.0
+  description: Demo API
+servers:
+  - url: https://{domain}/api/v1
+paths:
+  /user/login:
+    post:
+      summary: 用户登录
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        "200":
+          description: 登录成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResp'
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                format: JwtToken
+                description: 登陆 Token
+  /user/register:
+    post:
+      summary: 用户注册
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                username:
+                  type: string
+                password:
+                  type: string
+                code:
+                  type: string
+      responses:
+        "201":
+          description: 注册成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResp'
+  /email/code:
+    post:
+      summary: 发送邮箱验证码
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+      responses:
+        "200":
+          description: 发送成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResp'
+  /user/all:
+    get:
+      summary: 管理员获取所有用户
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: 操作成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserListResp'
+  /user:
+    delete:
+      summary: 管理员删除用户
+      security:
+        - cookieAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+      responses:
+        "200":
+          description: 删除成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResp'
+  /app/me:
+    get:
+      summary: 获取当前用户的所有应用列表
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: 操作成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppListResp'
+  /app:
+    get:
+      summary: 获取单个应用详情
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                app_id:
+                  type: integer
+      responses:
+        "200":
+          description: 操作成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationResp'
+    post:
+      summary: 创建新应用
+      security:
+        - bearerAuth: [ ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                app_name:
+                  type: string
+                app_image:
+                  type: string
+      responses:
+        "201":
+          description: 应用创建成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationResp'
+    patch:
+      summary: 修改应用信息
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                app_id:
+                  type: integer
+                app_name:
+                  type: string
+                app_image:
+                  type: string
+      responses:
+        "200":
+          description: 应用修改成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationResp'
+    delete:
+      summary: 删除应用
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                app_id:
+                  type: integer
+      responses:
+        "200":
+          description: 删除成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResp'
+components:
+  schemas:
+    LoginResp:
+      $ref: '#/components/schemas/BaseResp'
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/LoginData'
+    UserResp:
+      $ref: '#/components/schemas/BaseResp'
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/User'
+    UserListResp:
+      $ref: '#/components/schemas/BaseResp'
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+    BaseResp:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 0
+        message:
+          type: string
+          example: success
+    LoginData:
+      type: object
+      properties:
+        token:
+          type: string
+        expire:
+          type: string
+
+    User:
+      type: object
+      properties:
+        user_id:
+          type: integer
+          example: 1
+        username:
+          type: string
+        email:
+          type: string
+        avatar:
+          type: string
+        is_active:
+          type: boolean
+        is_admin:
+          type: boolean
+        create_at:
+          type: string
+          format: date-time
+        update_at:
+          type: string
+          format: date-time
+    AppListResp:
+      $ref: '#/components/schemas/BaseResp'
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Application'
+    ApplicationResp:
+      $ref: '#/components/schemas/BaseResp'
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/Application'
+    Application:
+      type: object
+      properties:
+        app_id:
+          type: integer
+          example: 1
+        app_name:
+          type: string
+        app_status:
+          type: string
+          enum:
+            - development
+            - online
+            - offline
+            - closed
+        app_port:
+          type: integer
+          example: 5000
+        app_image:
+          type: string
+        user_id:
+          type: integer
+          example: 1
+        create_at:
+          type: string
+          format: date-time
+        update_at:
+          type: string
+          format: date-time
